@@ -2,7 +2,7 @@ Package: pipschema
 Title: Identify and Validate Schemas in PIP API Data
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
+    person("Rossana", "Tatulli", , "rtatulli@worldbank.org", role = c("aut", "cre"))
 Description: Tools to identify, validate, and document data schemas used by the Poverty and Inequality Platform (PIP) API.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -11,3 +11,5 @@ RoxygenNote: 7.3.3
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+URL: https://github.com/PIP-Technical-Team/pipschema
+BugReports: https://github.com/PIP-Technical-Team/pipschema/issues

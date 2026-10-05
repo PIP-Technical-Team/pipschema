@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "compound-gpid-roadmap-v1",
+  "milestones": [
+    {
+      "id": "in-order-defining-what-a",
+      "title": "In order: defining what a schema is, what rules define it, and which PIP vintage belongs to which schema.",
+      "objective": "In order: defining what a schema is, what rules define it, and which PIP vintage belongs to which schema.",
+      "status": "in-progress",
+      "features": [
+        {
+          "id": "initial-focus",
+          "title": "In order: defining what a schema is, what rules define it, and which PIP vintage belongs to which schema.",
+          "status": "in-progress",
+          "plan": null
+        }
+      ]
+    }
+  ]
+}
