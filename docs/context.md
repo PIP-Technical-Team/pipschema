@@ -71,25 +71,29 @@ ITS data pipeline --writes--> /Data (flat folder of vintage folders)
 
 ## 4a. What a schema is
 
-> A **schema** is a named description of the structure and format a vintage folder has, defined by explicit rules about its contents, such that every vintage folder with the same schema can be read and used by `{pipapi}` in the same way.
+> A **schema** is a named description of the structure and format a vintage folder has, defined by explicit rules about its contents, so that vintage folders with the same schema have the same structure and can be handled in the same way. `{pipapi}` is the main consumer, so what it relies on weighs heavily, but the rules are not limited to what it reads today.
 
-**The test that defines it.** Two vintage folders belong to **different schemas** if and only if the difference between them would require `{pipapi}` to behave differently to read or use them, or would make it fail or give wrong results. Differences `{pipapi}` doesn't care about (the numbers themselves, new survey years, extra files it never reads) do **not** create a new schema.
+**The principle: schemas describe the data's structure, with `{pipapi}` as the main (but not the only) reference.** `{pipapi}` is the main consumer of the schemas, so what it reads is very important and relevant, and it is the first evidence for which structural differences matter. But the schema rules must **not be limited to what `{pipapi}` consumes today**. This is the reason `{pipschema}` is a separate package: to identify and record the structure of the data properly, so the definitions stay valid when `{pipapi}` changes. If a future `{pipapi}` version starts using files or sub-folders it ignores today, the rules should not be unprepared for it.
 
-**Shape, not content.** A schema describes the *shape* of a vintage folder: what `{pipapi}` relies on to load and use it. That means which files and sub-folders exist, what format they are in, and which tables and columns they hold. It does not describe the *content*, meaning which countries, years or estimates are inside. A new vintage with updated numbers and the same shape has the same schema as the previous one.
+This does **not** mean schemas should be very fine-grained. The aim is a sensible, reasonably coarse set of schemas, whose rules are allowed to look at the structure of the folder beyond what `{pipapi}` happens to read now. Whether a given difference defines a new schema is a judgement to make case by case during the design work.
+
+**One container serves exactly one schema** (see section 2). That stays unchanged.
+
+**Shape, not content.** A schema describes the *shape* of a vintage folder: which files and sub-folders exist, what format they are in, and which tables and columns they hold. It does not describe the *content*, meaning which countries, years or estimates are inside. A new vintage with updated numbers and the same shape has the same schema as the previous one.
 
 **Identified by rules.** A schema is identified by explicit, checkable statements about a folder's contents. Any vintage folder can be tested against them, and a person can read the rules to see why a folder was assigned to a schema. A schema is **not** defined by the folder's name or date. A date may hint at when a structure changed, but the structure is what counts.
 
-**Not fixed in advance, and not tied to any one change.** Schemas are the distinct groups of vintage folders that the rules actually produce on the real data. The lineup change in `{pipapi}` (see section 6) is **one known example** of a structural difference that matters, not the definition of a schema. There may be other boundaries (for example file format switches or changed columns), and one known change may even split into several. This has to be found in the data, not assumed.
+**Not fixed in advance, and not tied to any one change.** Schemas are the distinct groups of vintage folders that the rules actually produce on the real data. The lineup change in `{pipapi}` (see section 6) is **one known example** of a structural difference, not the definition of a schema. There may be other boundaries (for example file format switches or changed columns), and one known change may even split into several. This has to be found in the data, not assumed.
 
 **Kinds of difference worth considering** (a checklist for the design work, not a list of answers):
-- a file or folder that must exist, or must not exist
+- a file or folder that exists in one structure but not in another
 - a file whose name changed
 - a file whose format changed
 - a table whose columns changed (added, removed, renamed, or a different type)
 
-**Out of scope for the first version:** differences in *meaning only*, where a column keeps its name and type but its definition changes. They can't be detected from file structure alone and would need information from the data team. Record them as a known limit **[OPEN, later]**.
+**Granularity is a design question.** Because the rules are not limited to what `{pipapi}` uses, they could in principle separate folders by very small differences. The aim is the opposite: a reasonably coarse set of schemas. Which differences are worth a new schema, and which are only recorded as detail within one, is open work **[OPEN]**. The first version starts coarse.
 
-**Working assumption:** whether a difference "matters" is judged against the `{pipapi}` code as it exists today. A newer `{pipapi}` that reads more files could change what matters.
+**Out of scope for the first version:** differences in *meaning only*, where a column keeps its name and type but its definition changes. They can't be detected from file structure alone and would need information from the data team. Record them as a known limit **[OPEN, later]**.
 
 ### Relationship rules
 
@@ -162,7 +166,7 @@ Earlier design notes mentioned incremental changes in 2025 (file format switches
 2. **Release consistency.** Do all folders sharing a date prefix (different PPP years, PROD/INT/TEST) always share a schema?
 3. **Schema file name, location and format.** One file at the top of `/Data`, or one file in a new `schemas/` folder? YAML or JSON?
 4. **How rules are expressed**, and what kinds of rule are needed.
-5. **Granularity: how small a difference counts.** If a change affects only one rarely used table, is it a new schema? The "would `{pipapi}` behave differently" test says yes if `{pipapi}` reads that table, but many schemas mean more containers. The decision for the first version is to **start coarse**, and to refine only when the data shows it is needed. Also open: whether differences `{pipapi}` can tolerate (for example an extra optional column) stay in the same schema.
+5. **Granularity: how small a difference counts.** The rules are not limited to what `{pipapi}` reads today, but the aim is a reasonably coarse set of schemas, not a very fine one. Which differences define a new schema, and which are recorded only as detail within a schema, is undecided. The decision for the first version is to **start coarse**, and to refine only when the data shows it is needed.
 5b. **Meaning-only changes** (same names and types, different definition) are out of scope for the first version and a known limit.
 6. **Folders that match no schema** (older or damaged ones): fail, or list as excluded? Never classify them silently.
 7. **Sharing the vintage-folder-name definition** with `{pipapi}`, so both agree on what a vintage folder is.
@@ -176,7 +180,7 @@ Earlier design notes mentioned incremental changes in 2025 (file format switches
 
 Start with a short design session inside `{pipschema}` (for example `/cg-brainstorm`), working from the definition in section 4a:
 
-1. Decide **which differences between vintage folders matter to `{pipapi}`**, using section 6 as starting evidence only.
+1. Decide **which structural differences between vintage folders are worth separating into schemas** (the granularity question in section 4a). Use section 6 as starting evidence: `{pipapi}`'s code shows some differences that exist and are important, but it does not limit what the rules may cover.
 2. Decide **how to express the rules** (open questions 4 to 6).
 3. Run the rules over the real folders (read-only) and see **which groups appear**. Those groups are the schemas, and they are named afterwards.
 4. Settle the schema file format (open question 3) only after that.
