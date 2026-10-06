@@ -12,6 +12,13 @@
           "title": "In order: defining what a schema is, what rules define it, and which PIP vintage belongs to which schema.",
           "status": "in-progress",
           "plan": null
+        },
+        {
+          "id": "schema-rule-requirements",
+          "title": "Schema rule requirements: what makes a schema and how rules are expressed",
+          "status": "idea",
+          "plan": null,
+          "brainstorm": ".cg-docs/brainstorms/2026-10-06-schema-rule-requirements.md"
         }
       ]
     }
