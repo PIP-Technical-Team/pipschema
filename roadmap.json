@@ -19,6 +19,13 @@
           "status": "idea",
           "plan": null,
           "brainstorm": ".cg-docs/brainstorms/2026-10-06-schema-rule-requirements.md"
+        },
+        {
+          "id": "closed-schema-design",
+          "title": "Closed schema design: required + optional items, tracked skeleton, reviewed ignore list",
+          "status": "planned",
+          "plan": ".cg-docs/plans/2026-10-07-pipschema-schema-evaluator.md",
+          "brainstorm": ".cg-docs/brainstorms/2026-10-07-closed-schema-design.md"
         }
       ]
     }
