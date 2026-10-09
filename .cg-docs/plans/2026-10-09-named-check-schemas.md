@@ -10,6 +10,9 @@ deviation-policy: "ask"
 artifact-schema-version: 1
 phases: 3
 tags: [schema, classification, named-checks, yaml, evaluator]
+execution-report: ".cg-docs/work-reports/2026-10-09-named-check-schemas.md"
+completed-phases: [1]
+current-phase: 2
 ---
 
 # Plan: named-check schemas, evaluator and assignment file
@@ -38,6 +41,12 @@ folders and from `{pipapi}`, and reviewed before they are written.
   (`use_new_lineup_version()` in `R/create_lkups.R`, after 2025-05-01), then
   reads `estimations/prod_refy_estimation.fst`, `estimations/lineup_years.fst`
   and `lineup_data/<country>_<year>.fst`. That date cutoff is not a schema rule.
+  It is the guess this package replaces. A later `{pipapi}` version is built
+  for one or more known schemas and does not branch on the folder date. One
+  version serves `pre-lineup`. Another serves `new-lineup`. Removing that
+  cutoff, and any other schema conditional, is `{pipapi}` work. It is not built
+  here. The assignment file must make "folders for schema X" readable so that
+  work can use it.
 - The data directory holds only PROD vintage folders. There is no PROD filter.
 - Dialect: data.table-collapse. The evaluator should stay in base R plus
   `yaml`. Do not add data.table unless a step needs a table. No table is loaded
@@ -164,7 +173,7 @@ folders and from `{pipapi}`, and reviewed before they are written.
 ## Out of Scope
 
 - `.cg-docs/plans/2026-10-07-pipschema-schema-evaluator.md` and its inventory, ignore list, skeleton, and core `_aux` guard
-- How `{pipapi}` binds a version to one or more schemas
+- Editing `{pipapi}` so a version no longer branches on the folder date. The intended consumer is: one `{pipapi}` version serves one or more known schemas (here, one version for `pre-lineup` and another for `new-lineup`) and drops `use_new_lineup_version()`. That edit is out of scope. The assignment file is the input it will read.
 - The pairing file, routing, Docker, and ITS pipelines
 - Any edit to `{pipapi}`
 - A PROD/INT/TEST filter or a skipped-folder report
