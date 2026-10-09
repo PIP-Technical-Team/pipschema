@@ -11,8 +11,8 @@ artifact-schema-version: 1
 phases: 3
 tags: [schema, classification, named-checks, yaml, evaluator]
 execution-report: ".cg-docs/work-reports/2026-10-09-named-check-schemas.md"
-completed-phases: [1]
-current-phase: 2
+completed-phases: [1, 2]
+current-phase: 3
 ---
 
 # Plan: named-check schemas, evaluator and assignment file

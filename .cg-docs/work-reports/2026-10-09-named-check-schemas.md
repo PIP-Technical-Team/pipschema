@@ -17,6 +17,7 @@ status: "active"
 
 ### Completed steps/phases
 - Step 1 (Propose the checks) -- completed
+- Phase 1 -- completed
 
 ### Evidence table
 | ID | Phase | Required | Status | Evidence |
@@ -32,21 +33,25 @@ status: "active"
 ### Constraints check (phase scope)
 | ID | Phase | Status | Notes |
 |----|-------|--------|-------|
-| C1 | all | passed | Read-only discovery only; no data writes |
-| C2 | all | passed | Proposed checks are content-based, not date-based |
-| C3 | all | passed | Proposal uses named checks, not inventory matching |
-| C4 | all | passed | Discovery note contains no evaluator schema hardcoding |
+| C1 | all | passed | Discovery step remained read-only on data |
+| C2 | all | passed | Proposed checks use file/dir evidence, not date |
+| C3 | all | passed | Named-check matching proposed; no inventory logic |
+| C4 | all | passed | No evaluator hardcoding introduced in phase 1 |
 | C5 | all | pending | Not in phase scope |
-| C6 | all | passed | No tests run against `Y:/`; only metadata probes |
+| C6 | all | passed | Tests did not touch `Y:/`; only metadata probes |
 | C7 | all | pending | Not in phase scope |
 
 ### Decisions
-- Reused evidence from `pipapi` `create_lkups.R` for lineup-path artifacts.
-- Confirmed 19 PROD folders in `Y:/temp/povertyscore-data`.
-- Proposed separating check bundle based on four lineup markers and one format check.
+- Approved by user: schema IDs `pre-lineup`/`new-lineup`, 5-check new-lineup bundle, 4-check pre-lineup absence bundle.
+- Approved by user: `dir_extension` means all files under `lineup_data/` are `.fst`, directory non-empty, non-recursive.
+- Confirmed split: 13 `pre-lineup` and 6 `new-lineup` across 19 folders.
+
+### Test/evidence runs this session
+- `devtools::test(filter='helper-vintage|definitions|checks|classify')` -- PASS (27)
+- `devtools::test()` full suite gate -- PASS (27)
 
 ### Remaining uncertainty
-- User approval is required for the proposed check set and schema IDs before Step 3 may write `inst/schemas/definitions.yml`.
+- None for phase 1. Phase 2 implementation is complete and ready for phase boundary handoff.
 
 ### Final status
-- `active` (phase 1 complete; awaiting continue/stop decision for phase 2)
+- `active` (phase 2 complete; awaiting continue/stop decision for phase 3)

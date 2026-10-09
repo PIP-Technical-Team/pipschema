@@ -1,26 +1,30 @@
 {
   "schemaVersion": "compound-gpid-active-state-v1",
-  "updatedAt": "2026-10-09T12:01:44Z",
+  "updatedAt": "2026-10-09T12:16:09Z",
   "workflow": "/cg-work",
   "status": "handoff",
   "branch": "feat/schema-discovery",
   "plan": ".cg-docs/plans/2026-10-09-named-check-schemas.md",
   "executionReport": ".cg-docs/work-reports/2026-10-09-named-check-schemas.md",
-  "currentPhase": 2,
+  "currentPhase": 3,
   "evidenceStatus": [
     {
       "id": "V1",
       "status": "passed",
       "artifact": ".cg-docs/plans/2026-10-09-named-check-discovery.md"
-    }
-  ],
-  "unresolvedDecisions": [
+    },
     {
-      "id": "D1",
-      "summary": "Approve proposed checks/schema IDs before Step 3 writes definitions.",
-      "blocking": true
+      "id": "V2",
+      "status": "passed",
+      "artifact": "devtools::test(filter='helper-vintage|definitions|checks|classify')"
+    },
+    {
+      "id": "V3",
+      "status": "passed",
+      "artifact": "tests/testthat/test-classify.R"
     }
   ],
+  "unresolvedDecisions": [],
   "artifactRefs": [
     {
       "kind": "plan",
@@ -35,8 +39,8 @@
     {
       "kind": "evidence",
       "path": ".cg-docs/plans/2026-10-09-named-check-discovery.md",
-      "status": "proposed"
+      "status": "approved"
     }
   ],
-  "nextCommand": "/cg-work phase2"
+  "nextCommand": "/cg-work phase3"
 }

@@ -1,0 +1,33 @@
+version: 1
+schemas:
+  - id: pre-lineup
+    checks:
+      - type: dir_exists
+        path: lineup_data
+        present: false
+      - type: file_exists
+        path: estimations/prod_refy_estimation.fst
+        present: false
+      - type: file_exists
+        path: estimations/lineup_years.fst
+        present: false
+      - type: file_exists
+        path: estimations/lineup_dist_stats.fst
+        present: false
+  - id: new-lineup
+    checks:
+      - type: dir_exists
+        path: lineup_data
+        present: true
+      - type: dir_extension
+        path: lineup_data
+        extension: .fst
+      - type: file_exists
+        path: estimations/prod_refy_estimation.fst
+        present: true
+      - type: file_exists
+        path: estimations/lineup_years.fst
+        present: true
+      - type: file_exists
+        path: estimations/lineup_dist_stats.fst
+        present: true
