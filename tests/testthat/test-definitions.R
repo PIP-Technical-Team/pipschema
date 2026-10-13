@@ -3,12 +3,14 @@ sample_definitions <- list(
   schemas = list(
     list(
       id = "pre-lineup",
+      description = "Has none of the four lineup markers.",
       checks = list(
         list(type = "dir_exists", path = "lineup_data", present = FALSE)
       )
     ),
     list(
       id = "new-lineup",
+      description = "Has lineup_data and lineup estimation markers.",
       checks = list(
         list(type = "dir_exists", path = "lineup_data", present = TRUE)
       )
@@ -86,6 +88,60 @@ testthat::test_that("read_definitions rejects missing required check field", {
   testthat::expect_true(grepl("missing field(s): path", msg, fixed = TRUE))
 })
 
+testthat::test_that("read_definitions rejects missing schema description", {
+  tf <- tempfile(fileext = ".yml")
+  bad_obj <- sample_definitions
+  bad_obj$schemas[[1]]$description <- NULL
+  write_yaml_file(bad_obj, tf)
+
+  err <- testthat::expect_error(read_definitions(tf))
+  msg <- conditionMessage(err)
+  testthat::expect_true(grepl(tf, msg, fixed = TRUE))
+  testthat::expect_true(grepl("schema 'pre-lineup'", msg, fixed = TRUE))
+  testthat::expect_true(grepl("missing field 'description'", msg, fixed = TRUE))
+})
+
+testthat::test_that("read_definitions rejects non-scalar schema description", {
+  tf <- tempfile(fileext = ".yml")
+  bad_obj <- sample_definitions
+  bad_obj$schemas[[1]]$description <- c("one", "two")
+  write_yaml_file(bad_obj, tf)
+
+  err <- testthat::expect_error(read_definitions(tf))
+  msg <- conditionMessage(err)
+  testthat::expect_true(grepl(tf, msg, fixed = TRUE))
+  testthat::expect_true(grepl("schema 'pre-lineup'", msg, fixed = TRUE))
+  testthat::expect_true(grepl("missing field 'description'", msg, fixed = TRUE))
+})
+
+testthat::test_that("read_definitions rejects a non-scalar check path", {
+  tf <- tempfile(fileext = ".yml")
+  bad_obj <- sample_definitions
+  bad_obj$schemas[[1]]$checks[[1]]$path <- c("a", "b")
+  write_yaml_file(bad_obj, tf)
+
+  err <- testthat::expect_error(read_definitions(tf))
+  msg <- conditionMessage(err)
+  testthat::expect_true(grepl(tf, msg, fixed = TRUE))
+  testthat::expect_true(grepl("schema 'pre-lineup'", msg, fixed = TRUE))
+  testthat::expect_true(grepl("field 'path'", msg, fixed = TRUE))
+  testthat::expect_true(grepl("invalid shape", msg, fixed = TRUE))
+})
+
+testthat::test_that("read_definitions rejects empty fst_columns columns", {
+  tf <- tempfile(fileext = ".yml")
+  bad_obj <- sample_definitions
+  bad_obj$schemas[[1]]$checks[[1]] <- list(type = "fst_columns", path = "a.fst", columns = character(0))
+  write_yaml_file(bad_obj, tf)
+
+  err <- testthat::expect_error(read_definitions(tf))
+  msg <- conditionMessage(err)
+  testthat::expect_true(grepl(tf, msg, fixed = TRUE))
+  testthat::expect_true(grepl("schema 'pre-lineup'", msg, fixed = TRUE))
+  testthat::expect_true(grepl("field 'columns'", msg, fixed = TRUE))
+  testthat::expect_true(grepl("invalid shape", msg, fixed = TRUE))
+})
+
 testthat::test_that("read_definitions rejects unreadable or invalid yaml", {
   missing <- tempfile(fileext = ".yml")
   missing_err <- testthat::expect_error(read_definitions(missing))
@@ -99,4 +155,48 @@ testthat::test_that("read_definitions rejects unreadable or invalid yaml", {
   bad_msg <- conditionMessage(bad_err)
   testthat::expect_true(grepl("Failed to read yaml", bad_msg, fixed = TRUE))
   testthat::expect_true(grepl(bad, bad_msg, fixed = TRUE))
+})
+
+testthat::test_that("registry-only check type is accepted by loader and classifier", {
+  tf <- tempfile(fileext = ".yml")
+  obj <- list(
+    version = 1,
+    schemas = list(
+      list(
+        id = "dummy-schema",
+        description = "Dummy schema for registry override test.",
+        checks = list(
+          list(type = "dummy_exists", path = "dummy.flag", present = TRUE)
+        )
+      )
+    )
+  )
+  write_yaml_file(obj, tf)
+
+  withr::local_options(list(
+    pipschema.check_registry_override = list(
+      dummy_exists = list(
+        required_fields = c("path", "present"),
+        runner = function(check, base_path) {
+          target <- file.path(base_path, check$path)
+          exists <- file.exists(target)
+          expected <- isTRUE(check$present)
+          if (identical(exists, expected)) {
+            return(list(passed = TRUE, reason = NULL))
+          }
+          list(passed = FALSE, reason = sprintf("dummy_exists mismatch at %s", check$path))
+        }
+      )
+    )
+  ))
+
+  defs <- read_definitions(tf)
+  testthat::expect_equal(defs$schemas[[1]]$id, "dummy-schema")
+
+  root <- tempfile("dummy-reg-")
+  dir.create(root, recursive = TRUE)
+  v <- make_vintage(root, "v", c("dummy.flag"))
+
+  out <- classify_folder(v, defs)
+  testthat::expect_equal(out$schema_id, "dummy-schema")
 })

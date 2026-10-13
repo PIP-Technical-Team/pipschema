@@ -1,3 +1,58 @@
+check_registry <- function() {
+  list(
+    file_exists = list(
+      required_fields = c("path", "present"),
+      runner = check_file_exists
+    ),
+    dir_exists = list(
+      required_fields = c("path", "present"),
+      runner = check_dir_exists
+    ),
+    dir_extension = list(
+      required_fields = c("path", "extension"),
+      runner = check_dir_extension
+    ),
+    fst_columns = list(
+      required_fields = c("path", "columns"),
+      runner = check_fst_columns
+    )
+  )
+}
+
+get_check_registry <- function() {
+  reg <- check_registry()
+  override <- getOption("pipschema.check_registry_override", NULL)
+
+  if (!is.null(override)) {
+    reg <- utils::modifyList(reg, override)
+  }
+
+  reg
+}
+
+required_fields_for_check_type <- function(check_type) {
+  reg <- get_check_registry()
+  check_def <- reg[[check_type]]
+
+  if (is.null(check_def) || is.null(check_def$required_fields)) {
+    return(NULL)
+  }
+
+  as.character(check_def$required_fields)
+}
+
+run_check_with_registry <- function(check, base_path) {
+  type <- as.character(check$type)
+  reg <- get_check_registry()
+  check_def <- reg[[type]]
+
+  if (is.null(check_def) || is.null(check_def$runner)) {
+    stop(sprintf("Unknown check type: %s", type), call. = FALSE)
+  }
+
+  check_def$runner(check, base_path)
+}
+
 check_file_exists <- function(check, base_path) {
   target <- file.path(base_path, check$path)
   exists <- file.exists(target)
@@ -83,14 +138,5 @@ check_fst_columns <- function(check, base_path) {
 }
 
 run_check <- function(check, base_path) {
-  type <- as.character(check$type)
-
-  switch(
-    type,
-    file_exists = check_file_exists(check, base_path),
-    dir_exists = check_dir_exists(check, base_path),
-    dir_extension = check_dir_extension(check, base_path),
-    fst_columns = check_fst_columns(check, base_path),
-    stop(sprintf("Unknown check type: %s", type), call. = FALSE)
-  )
+  run_check_with_registry(check, base_path)
 }

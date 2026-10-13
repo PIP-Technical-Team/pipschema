@@ -15,40 +15,76 @@ knitr::opts_chunk$set(
 
 # pipschema
 
-<!-- badges: start -->
-<!-- badges: end -->
+The goal of `{pipschema}` is to define PIP data-folder schemas as reviewed
+YAML checks and classify each vintage folder deterministically.
 
-The goal of pipschema is to ...
+## What this package does
 
-## Installation
+`{pipschema}` has three parts:
 
-You can install the development version of pipschema like so:
+1. **Reviewed definitions** (`inst/schemas/definitions.yml`) listing schemas and
+   named checks.
+2. **Generic evaluator** that applies checks to folders without hardcoding
+   schema IDs.
+3. **Generated assignment file** that copies rules and lists folders under each
+   schema.
 
-``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
-```
+Current starting schemas are `pre-lineup` and `new-lineup`.
 
-## Example
+## Why these two schemas separate
 
-This is a basic example which shows you how to solve a common problem:
+`new-lineup` requires all lineup markers:
 
-```{r example}
+- `lineup_data/` exists, is non-empty, and contains only `.fst` files
+- `estimations/prod_refy_estimation.fst` exists
+- `estimations/lineup_years.fst` exists
+- `estimations/lineup_dist_stats.fst` exists
+
+`pre-lineup` requires all four markers above to be absent.
+
+A folder that has only some lineup markers matches neither schema and is
+reported as an error.
+
+## Match rule
+
+A folder matches a schema when all checks named for that schema pass. Extra
+files do not fail the match unless a check explicitly requires absence.
+
+Folder-name dates are not schema rules.
+
+The data directory holds only PROD vintage folders, so there is no
+PROD/INT/TEST filter.
+
+## Assignment output
+
+`assign_schemas()` writes YAML with:
+
+- `version`
+- `schemas[]` with each schema's `id`, checks, and sorted `folders`
+
+The package writes nothing if classification is invalid (zero match, multiple
+matches, or unevaluable check).
+
+## Extending
+
+Two extension paths are supported:
+
+- **Add a schema**: edit `inst/schemas/definitions.yml` (no evaluator rewrite).
+- **Add a check type**: add it to the check registry in `R/checks.R` (required
+  fields and runner function in one place).
+
+How `{pipapi}` versions bind to schemas is out of scope for this package.
+
+## Minimal example
+
+```{r example, eval = FALSE}
 library(pipschema)
-## basic example code
+
+defs <- read_definitions("inst/schemas/definitions.yml")
+classify_folder("path/to/one/vintage", defs)
+assign_schemas(
+  data_dir = "path/to/vintage-root",
+  output = "schema.yml",
+  definitions = defs
+)
 ```
-
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.

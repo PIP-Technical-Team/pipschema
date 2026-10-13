@@ -1,6 +1,7 @@
 version: 1
 schemas:
   - id: pre-lineup
+    description: Has none of the four lineup markers (lineup_data/, prod_refy_estimation.fst, lineup_years.fst, lineup_dist_stats.fst).
     checks:
       - type: dir_exists
         path: lineup_data
@@ -15,6 +16,7 @@ schemas:
         path: estimations/lineup_dist_stats.fst
         present: false
   - id: new-lineup
+    description: Has lineup_data/ (non-empty, .fst only) and the three lineup estimation files (prod_refy_estimation.fst, lineup_years.fst, lineup_dist_stats.fst).
     checks:
       - type: dir_exists
         path: lineup_data
