@@ -22,8 +22,8 @@
         },
         {
           "id": "closed-schema-design",
-          "title": "Closed schema design: required + optional items, tracked skeleton, reviewed ignore list",
-          "status": "planned",
+          "title": "Open schema design: a schema is a set of named checks; extra files are tolerated (closed design deferred)",
+          "status": "done",
           "plan": ".cg-docs/plans/2026-10-07-pipschema-schema-evaluator.md",
           "brainstorm": ".cg-docs/brainstorms/2026-10-07-closed-schema-design.md"
         }

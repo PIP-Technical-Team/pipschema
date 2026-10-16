@@ -5,7 +5,7 @@ r-syntax: "data.table-collapse"
 project-type: "package"
 review-depth: "thorough"
 created: "2026-10-05"
-cg-schema-version: ""
+cg-schema-version: "2026-09-09-c-research-workspace-migration"
 model-advisory:
   enabled: true
   examples: {}
